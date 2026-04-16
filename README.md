@@ -1,157 +1,138 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/tfm_-hwX)
 # Project 2: Moonlight Museum After Dark
 
-## Team information
-- Team name:
-- Members:
-- Repository name:
-
----
 
 ## Project summary
-Write 2-4 sentences explaining what your museum system does.
-
-Example starters:
-- Our project builds a system for organizing strange museum artifacts after dark.
-- The system uses multiple data structures to manage artifacts, requests, routes, and reports.
+Our project builds a museum management system for organizing strange artifacts during a secret late-night exhibition. The system uses multiple data structures — a BST for fast artifact lookup, a queue for restoration requests, a stack for undo history, and a linked list for the guided exhibit route. Helper functions generate category reports, room summaries, and sorted artifact lists.
 
 ---
 
 ## Feature checklist
-Mark each item when it is working.
 
 ### Core structures
-- [ ] `Artifact` class/record
-- [ ] `ArtifactBST`
-- [ ] `RestorationQueue`
-- [ ] `ArchiveUndoStack`
-- [ ] `ExhibitRoute` singly linked list
+- [x] `Artifact` class/record
+- [x] `ArtifactBST`
+- [x] `RestorationQueue`
+- [x] `ArchiveUndoStack`
+- [x] `ExhibitRoute` singly linked list
 
 ### BST features
-- [ ] insert artifact
-- [ ] search by ID
-- [ ] preorder traversal
-- [ ] inorder traversal
-- [ ] postorder traversal
-- [ ] duplicate IDs ignored
+- [x] insert artifact
+- [x] search by ID
+- [x] preorder traversal
+- [x] inorder traversal
+- [x] postorder traversal
+- [x] duplicate IDs ignored
 
 ### Queue features
-- [ ] add request
-- [ ] process next request
-- [ ] peek next request
-- [ ] empty check
-- [ ] size
+- [x] add request
+- [x] process next request
+- [x] peek next request
+- [x] empty check
+- [x] size
 
 ### Stack features
-- [ ] push action
-- [ ] undo last action
-- [ ] peek last action
-- [ ] empty check
-- [ ] size
+- [x] push action
+- [x] undo last action
+- [x] peek last action
+- [x] empty check
+- [x] size
 
 ### Linked list features
-- [ ] add stop to end
-- [ ] remove first matching stop
-- [ ] list stops in order
-- [ ] count stops
+- [x] add stop to end
+- [x] remove first matching stop
+- [x] list stops in order
+- [x] count stops
 
 ### Utility/report features
-- [ ] category counts
-- [ ] unique rooms
-- [ ] sort by age
-- [ ] linear search by name
+- [x] category counts
+- [x] unique rooms
+- [x] sort by age
+- [x] linear search by name
 
 ### Integration
-- [ ] `demo_museum_night()`
-- [ ] at least 8 artifacts in demo
-- [ ] demo shows system parts working together
+- [x] `demo_museum_night()`
+- [x] at least 8 artifacts in demo
+- [x] demo shows system parts working together
 
 ---
 
 ## Design note (150-250 words)
-Explain your main design choices.
 
-Things to include:
-- Why a BST makes sense for artifact IDs
-- Why a queue fits restoration requests
-- Why a stack fits undo actions
-- Why a linked list fits an exhibit route
-- How your system is organized across classes and functions
+We chose a **Binary Search Tree** for the artifact archive because artifact IDs are unique integers, which makes BST ordering natural. Searching by ID takes O(h) time — much faster than scanning a list — and inorder traversal produces artifacts in sorted ID order for free, which is useful for audits and reports.
 
-Write your note here:
+A **queue** fits restoration requests because the museum staff should handle the oldest request first. This is the classic FIFO problem: the first artifact flagged for repair should be the first one serviced. Python's `collections.deque` makes both enqueue and dequeue O(1).
+
+A **stack** fits the undo system because the most recent action is always the one to reverse. LIFO order is exactly what undo requires. A plain Python list with `append` and `pop` gives us O(1) push and undo with no extra imports.
+
+A **singly linked list** fits the exhibit route because the route is ordered and we frequently add stops to the end or remove a specific stop by name. The linked list makes structural changes easy without shifting elements like a list would require.
+
+The system is organized into clearly separated classes for each structure, with standalone utility functions for reporting. The `demo_museum_night` function ties everything together to prove the system works as a whole.
 
 ---
 
 ## Complexity reasoning
-Write short, specific explanations.
 
-### Example format
-- `ArtifactBST.search_by_id`: `O(h)` where `h` is the tree height, because the search follows one path from the root down.
-- `RestorationQueue.process_next_request`: `O(1)` because deque removal from the front is constant time.
-
-### Your required entries
-- `ArtifactBST.insert`:
-- `ArtifactBST.search_by_id`:
-- `ArtifactBST.inorder_ids`:
-- `RestorationQueue.process_next_request`:
-- `ArchiveUndoStack.undo_last_action`:
-- `ExhibitRoute.remove_stop`:
-- `sort_artifacts_by_age`:
-- `linear_search_by_name`:
+- `ArtifactBST.insert`: O(h) where h is the tree height, because we follow one path from root to an empty child slot. In the worst case (sorted input) h = n, giving O(n).
+- `ArtifactBST.search_by_id`: O(h) — we follow at most one path from root to a leaf, comparing IDs at each step.
+- `ArtifactBST.inorder_ids`: O(n) — every node is visited exactly once during the recursive traversal.
+- `RestorationQueue.process_next_request`: O(1) — `deque.popleft()` removes the front element in constant time.
+- `ArchiveUndoStack.undo_last_action`: O(1) — `list.pop()` removes the last element in constant time.
+- `ExhibitRoute.remove_stop`: O(n) — in the worst case we walk the entire list to find the matching stop.
+- `sort_artifacts_by_age`: O(n log n) — Python's built-in `sorted()` uses Timsort.
+- `linear_search_by_name`: O(n) — we scan the list from the front until a name matches or the list ends.
 
 ---
 
 ## Edge-case checklist
-Explain how your code handles each case.
 
 ### BST
-- [ ] insert into empty tree
-- [ ] search for missing ID
-- [ ] empty traversals
-- [ ] duplicate ID
+- [x] insert into empty tree — first insert sets `self.root` directly
+- [x] search for missing ID — recursive search returns `None` when it reaches a `None` node
+- [x] empty traversals — all three traversals return `[]` when `self.root is None`
+- [x] duplicate ID — `_insert` compares IDs and returns `False` without modifying the tree
 
 ### Queue
-- [ ] process empty queue
-- [ ] peek empty queue
+- [x] process empty queue — `process_next_request` checks `if self._items` before calling `popleft`
+- [x] peek empty queue — `peek_next_request` returns `None` when `_items` is empty
 
 ### Stack
-- [ ] undo empty stack
-- [ ] peek empty stack
+- [x] undo empty stack — `undo_last_action` returns `None` when `_items` is empty
+- [x] peek empty stack — `peek_last_action` returns `None` when `_items` is empty
 
 ### Exhibit route linked list
-- [ ] empty route
-- [ ] remove missing stop
-- [ ] remove first stop
-- [ ] remove middle stop
-- [ ] remove last stop
-- [ ] one-stop route
+- [x] empty route — `list_stops` returns `[]`, `count_stops` returns `0`
+- [x] remove missing stop — `remove_stop` returns `False` after walking the full list without a match
+- [x] remove first stop — handled as a special case: `self.head = self.head.next`
+- [x] remove middle stop — `prev.next = current.next` skips the matching node
+- [x] remove last stop — same `prev.next = current.next` sets `prev.next = None`
+- [x] one-stop route — handled by the head special case; result is an empty list
 
 ### Reports
-- [ ] empty artifact list
-- [ ] repeated categories
-- [ ] repeated rooms
-- [ ] missing artifact name
-- [ ] same-age artifacts
+- [x] empty artifact list — all four functions return empty dict, set, list, or `None`
+- [x] repeated categories — `count_artifacts_by_category` uses `dict.get` with a default of 0
+- [x] repeated rooms — `unique_rooms` uses a set comprehension, so duplicates are removed automatically
+- [x] missing artifact name — `linear_search_by_name` returns `None` when no match is found
+- [x] same-age artifacts — `sort_artifacts_by_age` uses a stable sort, so equal-age artifacts keep their original relative order
 
 ---
 
 ## Demo plan / how to run
-Explain how someone should run your project.
 
-Example:
+Run the full test suite:
 ```bash
-pytest -q
-python -c "from src.project import demo_museum_night; demo_museum_night()"
+python -m pytest -q
 ```
 
-Write your steps here:
+Run the integration demo:
+```bash
+python -c "from src.project import demo_museum_night; demo_museum_night()"
+```
 
 ---
 
 ## Assistance & sources
-This section is required.
-
-- AI used? (Y/N)
-- What it helped with:
-- Non-course sources used:
-- Links:
+- AI used? Y
+- What it helped with: code structure, recursive BST logic, edge-case review, README writing
+- Non-course sources used: Python docs for `collections.deque`, `sorted()`, `dataclasses`
+- Links: https://docs.python.org/3/library/collections.html#collections.deque
